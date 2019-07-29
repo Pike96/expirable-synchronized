@@ -5,7 +5,7 @@ const LAST_PROMISE_PREFIX = 'expirable-synchronized-last-promise-';
  *
  * @param PROMISE_LIFE: How long we wait for a function to return a promise
  */
-export function synchronized(PROMISE_LIFE = 10000) {
+export function expirableSynchronized(PROMISE_LIFE = 10000) {
     /**
      * Inner decorator that takes function execution environment
      *
