@@ -1,4 +1,11 @@
 /**
+ * The name of promise pointer living in the caller object
+ * @type {string}
+ */
+const LAST_PROMISE_PREFIX = 'expirable-synchronized-last-promise-';
+const PROMISE_LIFE = 10000;
+
+/**
  * Block other function calls when one is in process by connecting all calls into a promise chain
  * Use it as an decorator, can be only applied to function that returns a promise
  *
@@ -13,12 +20,9 @@
      * @param descriptor: Details of the function
      */
     export function expirableSynchronized(target, funcName, descriptor) {
-        const LAST_PROMISE_PREFIX = 'expirable-synchronized-last-promise-';
-        const PROMISE_LIFE = 10000;
         console.log('target', target);
-        // target[ LAST_PROMISE_PREFIX + funcName ] is the pointer to build then-chain
-
         const clearLastPromise = () => {
+            // The pointer to build then-chain
             target[ LAST_PROMISE_PREFIX + funcName ] = null;
         };
 
