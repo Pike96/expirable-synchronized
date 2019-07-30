@@ -1,11 +1,10 @@
-const LAST_PROMISE_PREFIX = 'expirable-synchronized-last-promise-';
 /**
  * Block other function calls when one is in process by connecting all calls into a promise chain
  * Use it as an decorator, can be only applied to function that returns a promise
  *
  * @param PROMISE_LIFE: How long we wait for a function to return a promise
  */
-export function expirableSynchronized(PROMISE_LIFE = 10000) {
+// export function expirableSynchronized(PROMISE_LIFE = 10000) {
     /**
      * Inner decorator that takes function execution environment
      *
@@ -13,7 +12,9 @@ export function expirableSynchronized(PROMISE_LIFE = 10000) {
      * @param funcName: Name of the function
      * @param descriptor: Details of the function
      */
-    return function decorator(target, funcName, descriptor) {
+    export function expirableSynchronized(target, funcName, descriptor) {
+        const LAST_PROMISE_PREFIX = 'expirable-synchronized-last-promise-';
+        const PROMISE_LIFE = 10000;
         console.log('target', target);
         // target[ LAST_PROMISE_PREFIX + funcName ] is the pointer to build then-chain
 
@@ -60,6 +61,6 @@ export function expirableSynchronized(PROMISE_LIFE = 10000) {
             };
         }
         return descriptor;
-    };
+    // };
 }
 

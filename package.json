@@ -2,9 +2,12 @@
   "name": "expirable-synchronized",
   "version": "1.0.0",
   "description": "a decorator that can safely make any function that returns promise atomic",
-  "main": "src/index.js",
+  "main": "lib/index.js",
   "scripts": {
-    "test": ""
+    "clean": "rimraf lib/",
+    "build": "npm run clean && babel --source-maps --out-dir=lib/ src/",
+    "dev": "npm run clean && babel --source-maps --out-dir=lib/ src/ && npm link",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "chain",
@@ -20,5 +23,18 @@
     "synchronized"
   ],
   "author": "Pike96",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/cli": "7.2.3",
+    "@babel/core": "7.2.2",
+    "@babel/plugin-proposal-class-properties": "7.3.0",
+    "@babel/plugin-proposal-decorators": "7.3.0",
+    "@babel/plugin-proposal-export-default-from": "7.2.0",
+    "@babel/plugin-proposal-export-namespace-from": "^7.2.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.3.0",
+    "@babel/plugin-transform-async-to-generator": "7.2.0",
+    "@babel/preset-env": "7.3.1",
+    "babel-plugin-module-resolver": "~3.1.0",
+    "rimraf": "^2.6.3"
+  }
 }
