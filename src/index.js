@@ -16,7 +16,7 @@ const DEFAULT_PROMISE_LIFE = 5000;
  * @param life
  * @param prefix
  */
-export default function expirableSynchronized(life = DEFAULT_PROMISE_LIFE, prefix = DEFAULT_LAST_PROMISE_PREFIX) {
+export function expirableSynchronized(life = DEFAULT_PROMISE_LIFE, prefix = DEFAULT_LAST_PROMISE_PREFIX) {
     /**
      * Inner decorator that takes function execution environment
      *

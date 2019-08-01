@@ -1,4 +1,4 @@
-import expirableSynchronized from "./index";
+import { expirableSynchronized } from "./index";
 
 // jest.setTimeout(6000);
 
