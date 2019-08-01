@@ -16,7 +16,7 @@ const DEFAULT_PROMISE_LIFE = 5000;
  * @param life
  * @param prefix
  */
-export function expirableSynchronized(life = DEFAULT_PROMISE_LIFE, prefix = DEFAULT_LAST_PROMISE_PREFIX) {
+export default function expirableSynchronized(life = DEFAULT_PROMISE_LIFE, prefix = DEFAULT_LAST_PROMISE_PREFIX) {
     /**
      * Inner decorator that takes function execution environment
      *
@@ -39,7 +39,7 @@ export function expirableSynchronized(life = DEFAULT_PROMISE_LIFE, prefix = DEFA
                     let timeoutId;
                     let timeoutPromise = new Promise((resolve, reject) => {
                         timeoutId = setTimeout(() => {
-                            reject('Synchronized function timed out in ' + life + 'ms.');
+                            reject(`Synchronized function timed out in ${life} ms.`);
                         }, life);
                     });
 
