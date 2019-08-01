@@ -13,7 +13,8 @@ const DEFAULT_PROMISE_LIFE = 5000;
  * Block other function calls when one is in process by connecting all calls into a promise chain
  * Use it as an decorator, can be only applied to function that returns a promise
  *
- * @param life: How long we wait for a function to return a promise
+ * @param life
+ * @param prefix
  */
 export function expirableSynchronized(life = DEFAULT_PROMISE_LIFE, prefix = DEFAULT_LAST_PROMISE_PREFIX) {
     /**
@@ -25,7 +26,7 @@ export function expirableSynchronized(life = DEFAULT_PROMISE_LIFE, prefix = DEFA
      */
     return function decorator(target, funcName, descriptor) {
         // target[pName]: The pointer to build the promise chain
-        const pName = LAST_PROMISE_PREFIX + funcName;
+        const pName = prefix + funcName;
         const clearLastPromise = () => {
             target[pName] = null;
         };
