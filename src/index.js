@@ -63,6 +63,7 @@ export function expirableSynchronized(life = DEFAULT_PROMISE_LIFE, prefix = DEFA
                     return target[pName];
                 }
                 catch (e) {
+                    console.log(`expirable-synchronized: Error in ${funcName}`, e);
                     throw e;
                 }
             };
