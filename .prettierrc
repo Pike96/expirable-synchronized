@@ -1,5 +1,6 @@
 {
   "singleQuote": true,
+  "quoteProps": "consistent",
   "trailingComma": "es5",
   "parser": "babel"
 }
