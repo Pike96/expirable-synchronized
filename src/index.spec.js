@@ -7,6 +7,8 @@ import { expirableSynchronized } from './index';
  */
 const delay = ts => new Promise( resolve => setTimeout( resolve, ts ) );
 
+const customPrefixName = 'unable-to-come-up-with-a-cool-prefix-so-let-it-be-';
+
 /**
  * Class to test
  */
@@ -62,6 +64,19 @@ class Test {
    */
   @expirableSynchronized( 300 )
   async increaseCountWithTime( ts, i ) {
+    await delay( ts );
+    this.count++;
+    this.executionArr.push( { call: i, count: this.count } );
+  }
+
+  /**
+   * The duplicate function of increaseCountWithTime, with a different prefix setting
+   * @param ts: Delay for the count increment
+   * @param i: Which function call it is
+   * @returns {Promise<void>}
+   */
+  @expirableSynchronized( 300, customPrefixName )
+  async increaseCountWithTime2( ts, i ) {
     await delay( ts );
     this.count++;
     this.executionArr.push( { call: i, count: this.count } );
@@ -165,4 +180,33 @@ test( 'shorter timeout', async () => {
 
   expect( arr[ 2 ].call ).toBe( 0 );
   expect( arr[ 2 ].count ).toBe( 3 );
+} );
+
+test( 'shorter timeout with different prefix', async () => {
+  instance.reset();
+  instance.increaseCountWithTime2( 500, 0 );
+  await delay( 10 );
+  instance.increaseCountWithTime2( 100, 1 );
+  await delay( 10 );
+  instance.increaseCountWithTime2( 100, 2 );
+
+  // Wait for all function calls to finish
+  await delay( 1000 );
+
+  // Have to hard code the timeout behavior results here
+  const arr = instance.executionArr;
+  expect( arr[ 0 ].call ).toBe( 1 );
+  expect( arr[ 0 ].count ).toBe( 1 );
+
+  expect( arr[ 1 ].call ).toBe( 2 );
+  expect( arr[ 1 ].count ).toBe( 2 );
+
+  expect( arr[ 2 ].call ).toBe( 0 );
+  expect( arr[ 2 ].count ).toBe( 3 );
+
+  /**
+   * If prefix doesn't work, the pointer should be undefined
+   * After all function finishes, it should be null due to clearLastPromise
+   */
+  !expect( instance[ `${customPrefixName}increaseCountWithTime2` ] ).toBeNull();
 } );
