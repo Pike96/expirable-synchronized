@@ -2,11 +2,11 @@
   "name": "expirable-synchronized",
   "version": "1.0.0",
   "description": "a decorator that can safely make any function that returns promise atomic",
-  "main": "lib/index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "clean": "rimraf lib/",
-    "build": "npm run clean && npm run test && babel --out-dir=lib/ src/index.js",
-    "dev": "npm run clean && babel --source-maps --out-dir=lib/ src/index.js && npm link",
+    "clean": "rimraf dist/",
+    "build": "npm run clean && npm run test && babel --out-dir=dist/ src/index.js",
+    "dev": "npm run clean && babel --source-maps --out-dir=dist/ src/index.js && npm link",
     "test": "jest"
   },
   "keywords": [
