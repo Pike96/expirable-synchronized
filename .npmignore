@@ -1,0 +1,6 @@
+.idea
+.*
+*.config.js
+*.spec.js
+*.js.map
+src
