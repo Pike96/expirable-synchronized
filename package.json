@@ -5,9 +5,9 @@
   "main": "dist/index.js",
   "scripts": {
     "clean": "rimraf dist/",
-    "build": "npm run clean && npm run test && babel --out-dir=dist/ src/index.js",
-    "dev": "npm run clean && babel --source-maps --out-dir=dist/ src/index.js && npm link",
-    "test": "jest"
+    "build": "npm run clean && babel --out-dir=dist/ src/ && jest",
+    "dev": "npm run clean && babel --source-maps --out-dir=dist/ src/ && npm link",
+    "test": "npm run build"
   },
   "keywords": [
     "chain",

@@ -1,4 +1,4 @@
-import { expirableSynchronized } from '../dist/index';
+import { expirableSynchronized } from './index';
 
 /**
  * Util function to do setTimeout in promise way
