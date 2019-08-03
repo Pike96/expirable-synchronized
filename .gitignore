@@ -1,7 +1,6 @@
 dist/
-dist/
 .vscode/
-.idea
-*.DS_Store
+.idea/
 node_modules/
+*.DS_Store
 package-lock.json
