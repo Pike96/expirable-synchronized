@@ -6,7 +6,7 @@ Similar to Java's `@synchronized`, this decorator can make a function atomic!
 
 ***The function to apply this decorator must return a promise***
 
-####How it works:
+#### How it works:
 
 It connects all function calls into a promise chain. 
 It's safe because you can set an expiry time. 
