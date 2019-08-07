@@ -1,7 +1,15 @@
 {
   "name": "expirable-synchronized",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "a decorator that can safely make any function that returns promise atomic",
+  "homepage": "https://github.com/Pike96/expirable-synchronized",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Pike96/expirable-synchronized.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Pike96/expirable-synchronized/issues"
+  },
   "main": "dist/index.js",
   "scripts": {
     "clean": "rimraf dist/",
@@ -12,17 +20,27 @@
   "keywords": [
     "chain",
     "decorator",
+    "annotation",
+    "es6",
+    "es2015",
     "expirable",
     "function",
     "lock",
     "promise",
+    "promises",
+    "async",
+    "await",
     "queue",
     "synchronise",
     "synchronised",
     "synchronize",
     "synchronized"
   ],
-  "author": "Pike96",
+  "author": {
+    "name": "Yucheng Lin",
+    "email": "linyucheng256@gmail.com",
+    "url": "https://github.com/Pike96/"
+  },
   "license": "ISC",
   "devDependencies": {
     "@babel/cli": "7.2.3",
