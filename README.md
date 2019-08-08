@@ -2,7 +2,7 @@
 
 > A decorator to make Promise function synchronized safely (with expiration time)
 
-Similar to Java's `@synchronized`, this decorator can make a function atomic! All function calls are ordered by FIFO manner.
+Similar to Java's `@synchronized`, this decorator can make a function atomic! All function calls are ordered by FIFO manner (Fair lock).
 
 ***The function to apply this decorator must return a promise***
 
