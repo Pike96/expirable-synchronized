@@ -13,7 +13,7 @@
   "main": "dist/index.js",
   "scripts": {
     "clean": "rimraf dist/",
-    "build": "npm run clean && babel --out-dir=dist/ src/ && jest",
+    "build": "npm run clean && babel --out-dir=dist/ src/ && jest dist/*.spec.js",
     "dev": "npm run clean && babel --source-maps --out-dir=dist/ src/ && npm link",
     "test": "npm run build"
   },
