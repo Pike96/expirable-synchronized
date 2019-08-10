@@ -1,4 +1,8 @@
-import { expirableSynchronized, expirableSynchronizedNonFair } from './index';
+import {
+  expirableSynchronized,
+  expirableSynchronizedOnce,
+  expirableSynchronizedNonFair,
+} from './index';
 
 /**
  * Util function to do setTimeout in promise way
@@ -82,8 +86,22 @@ class Test {
     this.executionArr.push( { call: i, count: this.count } );
   }
 
-  @expirableSynchronizedNonFair( 300 )
+  @expirableSynchronizedOnce()
   async increaseCountWithTime3( ts, i ) {
+    await delay( ts );
+    this.count++;
+    this.executionArr.push( { call: i, count: this.count } );
+  }
+
+  @expirableSynchronizedOnce( 500 )
+  async increaseCountWithTime4( ts, i ) {
+    await delay( ts );
+    this.count++;
+    this.executionArr.push( { call: i, count: this.count } );
+  }
+
+  @expirableSynchronizedNonFair()
+  async increaseCountWithTime5( ts, i ) {
     await delay( ts );
     this.count++;
     this.executionArr.push( { call: i, count: this.count } );
@@ -220,16 +238,59 @@ describe( 'fair mode', () => {
 } );
 
 describe( 'non-fair mode', () => {
-  test( '11', async () => {
+  test( 'normal finish', async () => {
+    instance.reset();
+    instance.increaseCountWithTime5( 500, 0 );
+
+    for ( let i = 1; i < 5; i++ ) {
+      await delay( 200 );
+      instance.increaseCountWithTime5( 1, i );
+    }
+
+    await delay( 1500 );
+    const arr = instance.executionArr;
+    console.log( arr );
+  } );
+} );
+
+describe( 'once mode', () => {
+  test( 'normal finish', async () => {
     instance.reset();
     instance.increaseCountWithTime3( 500, 0 );
 
-    for ( let i = 0; i < 20; i++ ) {
-      await delay( 1 );
+    for ( let i = 1; i < 5; i++ ) {
+      await delay( 200 );
       instance.increaseCountWithTime3( 1, i );
     }
 
-    await delay( 600 );
-    console.log( instance.executionArr );
+    await delay( 1500 );
+    const arr = instance.executionArr;
+    expect( arr[ 0 ].call ).toBe( 0 );
+    expect( arr[ 0 ].count ).toBe( 1 );
+
+    expect( arr[ 1 ].call ).toBe( 3 );
+    expect( arr[ 1 ].count ).toBe( 2 );
+
+    expect( arr[ 2 ].call ).toBe( 4 );
+    expect( arr[ 2 ].count ).toBe( 3 );
+  } );
+
+  test( 'timeout finish', async () => {
+    instance.reset();
+    instance.increaseCountWithTime4( 8000, 0 );
+
+    for ( let i = 1; i < 5; i++ ) {
+      await delay( 200 );
+      instance.increaseCountWithTime4( 1, i );
+    }
+
+    await delay( 1500 );
+    const arr = instance.executionArr;
+
+    expect( arr[ 0 ].call ).toBe( 3 );
+    expect( arr[ 0 ].count ).toBe( 1 );
+
+    expect( arr[ 1 ].call ).toBe( 4 );
+    expect( arr[ 1 ].count ).toBe( 2 );
   } );
 } );
