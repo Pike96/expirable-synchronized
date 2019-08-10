@@ -1,4 +1,4 @@
-import { expirableSynchronized } from './index';
+import { expirableSynchronized, expirableSynchronizedNonFair } from './index';
 
 /**
  * Util function to do setTimeout in promise way
@@ -81,132 +81,155 @@ class Test {
     this.count++;
     this.executionArr.push( { call: i, count: this.count } );
   }
+
+  @expirableSynchronizedNonFair( 300 )
+  async increaseCountWithTime3( ts, i ) {
+    await delay( ts );
+    this.count++;
+    this.executionArr.push( { call: i, count: this.count } );
+  }
 }
 // Global instance to run all tests
 const instance = new Test();
 
+describe( 'fair mode', () => {
+  test( '5*10ms delayed counts executed 10 times per 1ms', async () => {
+    const segments = 5;
+    instance.reset();
 
-test( '5*10ms delayed counts executed 10 times per 1ms', async () => {
-  const segments = 5;
-  instance.reset();
+    for ( let i = 0; i < 10; i++ ) {
+      instance.increaseCountsWithInterval( segments, 10, i );
+      await delay( 1 );
+    }
 
-  for ( let i = 0; i < 10; i++ ) {
-    instance.increaseCountsWithInterval( segments, 10, i );
-    await delay( 1 );
-  }
+    // Wait for all function calls to finish
+    await delay( 1000 );
 
-  // Wait for all function calls to finish
-  await delay( 1000 );
+    /**
+     * Counts should in the right order:
+     * No later segment finish before any previous segment & No later call finishes before any previous call
+     */
+    for ( const item of instance.executionArr ) {
+      expect( item.call ).toBe( Math.floor( ( item.count - 1 ) / segments ) );
+      expect( item.segment ).toBe( ( item.count - 1 ) % segments );
+    }
+  } );
 
-  /**
-   * Counts should in the right order:
-   * No later segment finish before any previous segment & No later call finishes before any previous call
-   */
-  for ( const item of instance.executionArr ) {
-    expect( item.call ).toBe( Math.floor( ( item.count - 1 ) / segments ) );
-    expect( item.segment ).toBe( ( item.count - 1 ) % segments );
-  }
-} );
+  test( '3*100ms delayed counts executed 5 times per 10ms', async () => {
+    const segments = 3;
+    instance.reset();
 
-test( '3*100ms delayed counts executed 5 times per 10ms', async () => {
-  const segments = 3;
-  instance.reset();
+    for ( let i = 0; i < 5; i++ ) {
+      instance.increaseCountsWithInterval( segments, 100, i );
+      await delay( 10 );
+    }
 
-  for ( let i = 0; i < 5; i++ ) {
-    instance.increaseCountsWithInterval( segments, 100, i );
+    // Wait for all function calls to finish
+    await delay( 3000 );
+
+    /**
+     * Counts should in the right order:
+     * No later segment finish before any previous segment & No later call finishes before any previous call
+     */
+    for ( const item of instance.executionArr ) {
+      expect( item.call ).toBe( Math.floor( ( item.count - 1 ) / segments ) );
+      expect( item.segment ).toBe( ( item.count - 1 ) % segments );
+    }
+  } );
+
+  test( 'shorter timeout with segments', async () => {
+    const segments = 2;
+    instance.reset();
+    instance.increaseCountsWithInterval2( segments, 500, 0 );
     await delay( 10 );
-  }
+    instance.increaseCountsWithInterval2( segments, 100, 1 );
 
-  // Wait for all function calls to finish
-  await delay( 3000 );
+    // Wait for all function calls to finish
+    await delay( 2000 );
 
-  /**
-   * Counts should in the right order:
-   * No later segment finish before any previous segment & No later call finishes before any previous call
-   */
-  for ( const item of instance.executionArr ) {
-    expect( item.call ).toBe( Math.floor( ( item.count - 1 ) / segments ) );
-    expect( item.segment ).toBe( ( item.count - 1 ) % segments );
-  }
+    // Have to hard code the timeout behavior results here
+    const arr = instance.executionArr;
+    expect( arr[ 0 ].call ).toBe( 1 );
+    expect( arr[ 0 ].segment ).toBe( 0 );
+    expect( arr[ 0 ].count ).toBe( 1 );
+
+    expect( arr[ 1 ].call ).toBe( 0 );
+    expect( arr[ 1 ].segment ).toBe( 0 );
+    expect( arr[ 1 ].count ).toBe( 2 );
+
+    expect( arr[ 2 ].call ).toBe( 1 );
+    expect( arr[ 2 ].segment ).toBe( 1 );
+    expect( arr[ 2 ].count ).toBe( 3 );
+
+    expect( arr[ 3 ].call ).toBe( 0 );
+    expect( arr[ 3 ].segment ).toBe( 1 );
+    expect( arr[ 3 ].count ).toBe( 4 );
+  } );
+
+  test( 'shorter timeout', async () => {
+    instance.reset();
+    instance.increaseCountWithTime( 500, 0 );
+    await delay( 10 );
+    instance.increaseCountWithTime( 100, 1 );
+    await delay( 10 );
+    instance.increaseCountWithTime( 100, 2 );
+
+    // Wait for all function calls to finish
+    await delay( 1000 );
+
+    // Have to hard code the timeout behavior results here
+    const arr = instance.executionArr;
+    expect( arr[ 0 ].call ).toBe( 1 );
+    expect( arr[ 0 ].count ).toBe( 1 );
+
+    expect( arr[ 1 ].call ).toBe( 2 );
+    expect( arr[ 1 ].count ).toBe( 2 );
+
+    expect( arr[ 2 ].call ).toBe( 0 );
+    expect( arr[ 2 ].count ).toBe( 3 );
+  } );
+
+  test( 'shorter timeout with different prefix', async () => {
+    instance.reset();
+    instance.increaseCountWithTime2( 500, 0 );
+    await delay( 10 );
+    instance.increaseCountWithTime2( 100, 1 );
+    await delay( 10 );
+    instance.increaseCountWithTime2( 100, 2 );
+
+    // Wait for all function calls to finish
+    await delay( 1000 );
+
+    // Have to hard code the timeout behavior results here
+    const arr = instance.executionArr;
+    expect( arr[ 0 ].call ).toBe( 1 );
+    expect( arr[ 0 ].count ).toBe( 1 );
+
+    expect( arr[ 1 ].call ).toBe( 2 );
+    expect( arr[ 1 ].count ).toBe( 2 );
+
+    expect( arr[ 2 ].call ).toBe( 0 );
+    expect( arr[ 2 ].count ).toBe( 3 );
+
+    /**
+     * If prefix doesn't work, the pointer should be undefined
+     * After all function finishes, it should be null due to clearLastPromise
+     */
+    !expect( instance[ `${customPrefixName}increaseCountWithTime2` ] ).toBeNull();
+  } );
 } );
 
-test( 'shorter timeout with segments', async () => {
-  const segments = 2;
-  instance.reset();
-  instance.increaseCountsWithInterval2( segments, 500, 0 );
-  await delay( 10 );
-  instance.increaseCountsWithInterval2( segments, 100, 1 );
+describe( 'non-fair mode', () => {
+  test( '11', async () => {
+    instance.reset();
+    instance.increaseCountWithTime3( 500, 0 );
 
-  // Wait for all function calls to finish
-  await delay( 2000 );
+    for ( let i = 0; i < 20; i++ ) {
+      await delay( 1 );
+      instance.increaseCountWithTime3( 1, i );
+    }
 
-  // Have to hard code the timeout behavior results here
-  const arr = instance.executionArr;
-  expect( arr[ 0 ].call ).toBe( 1 );
-  expect( arr[ 0 ].segment ).toBe( 0 );
-  expect( arr[ 0 ].count ).toBe( 1 );
-
-  expect( arr[ 1 ].call ).toBe( 0 );
-  expect( arr[ 1 ].segment ).toBe( 0 );
-  expect( arr[ 1 ].count ).toBe( 2 );
-
-  expect( arr[ 2 ].call ).toBe( 1 );
-  expect( arr[ 2 ].segment ).toBe( 1 );
-  expect( arr[ 2 ].count ).toBe( 3 );
-
-  expect( arr[ 3 ].call ).toBe( 0 );
-  expect( arr[ 3 ].segment ).toBe( 1 );
-  expect( arr[ 3 ].count ).toBe( 4 );
-} );
-
-test( 'shorter timeout', async () => {
-  instance.reset();
-  instance.increaseCountWithTime( 500, 0 );
-  await delay( 10 );
-  instance.increaseCountWithTime( 100, 1 );
-  await delay( 10 );
-  instance.increaseCountWithTime( 100, 2 );
-
-  // Wait for all function calls to finish
-  await delay( 1000 );
-
-  // Have to hard code the timeout behavior results here
-  const arr = instance.executionArr;
-  expect( arr[ 0 ].call ).toBe( 1 );
-  expect( arr[ 0 ].count ).toBe( 1 );
-
-  expect( arr[ 1 ].call ).toBe( 2 );
-  expect( arr[ 1 ].count ).toBe( 2 );
-
-  expect( arr[ 2 ].call ).toBe( 0 );
-  expect( arr[ 2 ].count ).toBe( 3 );
-} );
-
-test( 'shorter timeout with different prefix', async () => {
-  instance.reset();
-  instance.increaseCountWithTime2( 500, 0 );
-  await delay( 10 );
-  instance.increaseCountWithTime2( 100, 1 );
-  await delay( 10 );
-  instance.increaseCountWithTime2( 100, 2 );
-
-  // Wait for all function calls to finish
-  await delay( 1000 );
-
-  // Have to hard code the timeout behavior results here
-  const arr = instance.executionArr;
-  expect( arr[ 0 ].call ).toBe( 1 );
-  expect( arr[ 0 ].count ).toBe( 1 );
-
-  expect( arr[ 1 ].call ).toBe( 2 );
-  expect( arr[ 1 ].count ).toBe( 2 );
-
-  expect( arr[ 2 ].call ).toBe( 0 );
-  expect( arr[ 2 ].count ).toBe( 3 );
-
-  /**
-   * If prefix doesn't work, the pointer should be undefined
-   * After all function finishes, it should be null due to clearLastPromise
-   */
-  !expect( instance[ `${customPrefixName}increaseCountWithTime2` ] ).toBeNull();
+    await delay( 600 );
+    console.log( instance.executionArr );
+  } );
 } );

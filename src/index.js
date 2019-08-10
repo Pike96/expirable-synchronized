@@ -16,14 +16,17 @@ const DEFAULT_PROMISE_LIFE = 5000;
  * @param life
  * @param prefix
  */
-export function expirableSynchronized( life = DEFAULT_PROMISE_LIFE, prefix = DEFAULT_LAST_PROMISE_PREFIX ) {
+export function expirableSynchronizedFair(
+  life = DEFAULT_PROMISE_LIFE,
+  prefix = DEFAULT_LAST_PROMISE_PREFIX
+) {
   /**
-     * Inner decorator that takes function execution environment
-     *
-     * @param target: Function caller
-     * @param funcName: Name of the function
-     * @param descriptor: Details of the function
-     */
+   * Inner decorator that takes function execution environment
+   *
+   * @param target: Function caller
+   * @param funcName: Name of the function
+   * @param descriptor: Details of the function
+   */
   return function decorator( target, funcName, descriptor ) {
     // target[pName]: The pointer to build the promise chain
     const pName = prefix + funcName;
@@ -46,26 +49,29 @@ export function expirableSynchronized( life = DEFAULT_PROMISE_LIFE, prefix = DEF
           // Function execution promise
           const applyDecoratee = () => original.apply( this, args );
           const initPromise = new Promise( res => {
-            res( 'Sentinel/Dummy Promise' )
+            res( 'Sentinel/Dummy Promise' );
           } );
-          if ( !target[ pName ] ) { // If pointer is empty, run it
+          if ( !target[ pName ] ) {
+            // If pointer is empty, run it
             target[ pName ] = initPromise;
           }
-          target[ pName ] = target[ pName ].then( applyDecoratee ).catch( applyDecoratee );
+          target[ pName ] = target[ pName ]
+            .then( applyDecoratee )
+            .catch( applyDecoratee );
 
           // Race 2 promises. Only winner will be in the promise chain
-          target[ pName ] = Promise.race( [
-            target[ pName ],
-            timeoutPromise,
-          ] ).then( () => {
-            clearTimeout( timeoutId );
-          } )
+          target[ pName ] = Promise.race( [ target[ pName ], timeoutPromise ] )
+            .then( () => {
+              clearTimeout( timeoutId );
+            } )
             .catch( () => {
               clearTimeout( timeoutId );
             } );
 
           // Clear the pointer after done
-          target[ pName ] = target[ pName ].then( clearLastPromise ).catch( clearLastPromise );
+          target[ pName ] = target[ pName ]
+            .then( clearLastPromise )
+            .catch( clearLastPromise );
           return target[ pName ];
         }
         catch ( e ) {
@@ -76,4 +82,79 @@ export function expirableSynchronized( life = DEFAULT_PROMISE_LIFE, prefix = DEF
     }
     return descriptor;
   };
+}
+
+export function expirableSynchronizedNonFair(
+  life = DEFAULT_PROMISE_LIFE,
+  prefix = DEFAULT_LAST_PROMISE_PREFIX
+) {
+  /**
+   * Inner decorator that takes function execution environment
+   *
+   * @param target: Function caller
+   * @param funcName: Name of the function
+   * @param descriptor: Details of the function
+   */
+  return function decorator( target, funcName, descriptor ) {
+    // target[pName]: The pointer to build the promise chain
+    const pName = prefix + funcName;
+    const clearLastPromise = () => {
+      target[ pName ] = null;
+    };
+
+    const original = descriptor.value;
+    if ( typeof original === 'function' ) {
+      descriptor.value = function( ...args ) {
+        try {
+          // Timeout promise
+          let timeoutId;
+          const timeoutPromise = new Promise( ( resolve, reject ) => {
+            timeoutId = setTimeout( () => {
+              reject( `Synchronized function timed out in ${life} ms.` );
+            }, life );
+          } );
+
+          // Function execution promise
+          const applyDecoratee = () => original.apply( this, args );
+          const initPromise = new Promise( res => {
+            res( 'Sentinel/Dummy Promise' );
+          } );
+          if ( !target[ pName ] ) {
+            // If pointer is empty, run it
+            target[ pName ] = initPromise;
+          }
+          target[ pName ] = target[ pName ]
+            .then( applyDecoratee )
+            .catch( applyDecoratee );
+
+          // Race 2 promises. Only winner will be in the promise chain
+          target[ pName ] = Promise.race( [ target[ pName ], timeoutPromise ] )
+            .then( () => {
+              clearTimeout( timeoutId );
+            } )
+            .catch( () => {
+              clearTimeout( timeoutId );
+            } );
+
+          // Clear the pointer after done
+          target[ pName ] = target[ pName ]
+            .then( clearLastPromise )
+            .catch( clearLastPromise );
+          return target[ pName ];
+        }
+        catch ( e ) {
+          console.log( `expirable-synchronized: Error in ${funcName}`, e );
+          throw e;
+        }
+      };
+    }
+    return descriptor;
+  };
+}
+
+export function expirableSynchronized(
+  life = DEFAULT_PROMISE_LIFE,
+  prefix = DEFAULT_LAST_PROMISE_PREFIX
+) {
+  return expirableSynchronizedFair( life, prefix );
 }
