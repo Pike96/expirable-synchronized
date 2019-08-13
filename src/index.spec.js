@@ -99,13 +99,6 @@ class Test {
     this.count++;
     this.executionArr.push( { call: i, count: this.count } );
   }
-
-  @expirableSynchronizedNonFair()
-  async increaseCountWithTime5( ts, i ) {
-    await delay( ts );
-    this.count++;
-    this.executionArr.push( { call: i, count: this.count } );
-  }
 }
 // Global instance to run all tests
 const instance = new Test();
@@ -167,21 +160,13 @@ describe( 'fair mode', () => {
 
     // Have to hard code the timeout behavior results here
     const arr = instance.executionArr;
-    expect( arr[ 0 ].call ).toBe( 1 );
-    expect( arr[ 0 ].segment ).toBe( 0 );
-    expect( arr[ 0 ].count ).toBe( 1 );
-
-    expect( arr[ 1 ].call ).toBe( 0 );
-    expect( arr[ 1 ].segment ).toBe( 0 );
-    expect( arr[ 1 ].count ).toBe( 2 );
-
-    expect( arr[ 2 ].call ).toBe( 1 );
-    expect( arr[ 2 ].segment ).toBe( 1 );
-    expect( arr[ 2 ].count ).toBe( 3 );
-
-    expect( arr[ 3 ].call ).toBe( 0 );
-    expect( arr[ 3 ].segment ).toBe( 1 );
-    expect( arr[ 3 ].count ).toBe( 4 );
+    const expectedCallOrder = [ 1, 0, 1, 0 ];
+    const expectedSegmentOrder = [ 0, 0, 1, 1 ];
+    for ( const i in expectedCallOrder ) {
+      expect( arr[ i ].call ).toBe( expectedCallOrder[ i ] );
+      expect( arr[ i ].segment ).toBe( expectedSegmentOrder[ i ] );
+      expect( arr[ i ].count ).toBe( Number( i ) + 1 );
+    }
   } );
 
   test( 'shorter timeout', async () => {
@@ -197,14 +182,11 @@ describe( 'fair mode', () => {
 
     // Have to hard code the timeout behavior results here
     const arr = instance.executionArr;
-    expect( arr[ 0 ].call ).toBe( 1 );
-    expect( arr[ 0 ].count ).toBe( 1 );
-
-    expect( arr[ 1 ].call ).toBe( 2 );
-    expect( arr[ 1 ].count ).toBe( 2 );
-
-    expect( arr[ 2 ].call ).toBe( 0 );
-    expect( arr[ 2 ].count ).toBe( 3 );
+    const expectedOrder = [ 1, 2, 0 ];
+    for ( const i in expectedOrder ) {
+      expect( arr[ i ].call ).toBe( expectedOrder[ i ] );
+      expect( arr[ i ].count ).toBe( Number( i ) + 1 );
+    }
   } );
 
   test( 'shorter timeout with different prefix', async () => {
@@ -220,14 +202,11 @@ describe( 'fair mode', () => {
 
     // Have to hard code the timeout behavior results here
     const arr = instance.executionArr;
-    expect( arr[ 0 ].call ).toBe( 1 );
-    expect( arr[ 0 ].count ).toBe( 1 );
-
-    expect( arr[ 1 ].call ).toBe( 2 );
-    expect( arr[ 1 ].count ).toBe( 2 );
-
-    expect( arr[ 2 ].call ).toBe( 0 );
-    expect( arr[ 2 ].count ).toBe( 3 );
+    const expectedOrder = [ 1, 2, 0 ];
+    for ( const i in expectedOrder ) {
+      expect( arr[ i ].call ).toBe( expectedOrder[ i ] );
+      expect( arr[ i ].count ).toBe( Number( i ) + 1 );
+    }
 
     /**
      * If prefix doesn't work, the pointer should be undefined
@@ -247,34 +226,36 @@ describe( 'exclusive mode', () => {
       instance.increaseCountWithTime3( 1, i );
     }
 
+    // Wait for all function calls to finish
     await delay( 1500 );
+
+    // Call 1 and 2 are dropped
     const arr = instance.executionArr;
-    expect( arr[ 0 ].call ).toBe( 0 );
-    expect( arr[ 0 ].count ).toBe( 1 );
-
-    expect( arr[ 1 ].call ).toBe( 3 );
-    expect( arr[ 1 ].count ).toBe( 2 );
-
-    expect( arr[ 2 ].call ).toBe( 4 );
-    expect( arr[ 2 ].count ).toBe( 3 );
+    const expectedOrder = [ 0, 3, 4 ];
+    for ( const i in expectedOrder ) {
+      expect( arr[ i ].call ).toBe( expectedOrder[ i ] );
+      expect( arr[ i ].count ).toBe( Number( i ) + 1 );
+    }
   } );
 
   test( 'timeout finish', async () => {
     instance.reset();
-    instance.increaseCountWithTime4( 8000, 0 );
+    instance.increaseCountWithTime4( 800, 0 );
 
     for ( let i = 1; i < 5; i++ ) {
       await delay( 200 );
       instance.increaseCountWithTime4( 1, i );
     }
 
+    // Wait for all function calls to finish
     await delay( 1500 );
+
+    // Call 1 and 2 are dropped before call 0 timed out. 3 and 4 are not affected.
     const arr = instance.executionArr;
-
-    expect( arr[ 0 ].call ).toBe( 3 );
-    expect( arr[ 0 ].count ).toBe( 1 );
-
-    expect( arr[ 1 ].call ).toBe( 4 );
-    expect( arr[ 1 ].count ).toBe( 2 );
+    const expectedOrder = [ 3, 0, 4 ];
+    for ( const i in expectedOrder ) {
+      expect( arr[ i ].call ).toBe( expectedOrder[ i ] );
+      expect( arr[ i ].count ).toBe( Number( i ) + 1 );
+    }
   } );
 } );
