@@ -87,7 +87,7 @@ class Example {
 ```
 
 ### Options
-| Parameter | Description                                                                                                                                                                                 | Type   | Default Value                          |
-|-----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|----------------------------------------|
-| `life`    | The promise life limit. <br> After this amount of time, the next promise in chain will be executed anyway <br> Default value is 5 seconds (other packages like jest has 5s as timeout also) | number | 5000                                   |
-| `prefix`  | The prefix for the name of promise pointer living in the caller object. <br> Set this parameter in case that the default prefix has conflict with your existing object key                  | string | `expirable-synchronized-last-promise-` |
+| Parameter | Description                                                                                                                                                                                                                                               | Type   | Default Value                          |
+|-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|----------------------------------------|
+| `life`    | The promise life limit. <br> After this amount of time, the next promise in chain will be executed anyway in Fair mode, lock will be released any way in Exclusive mode <br> Default value is 5 seconds (other packages like jest has 5s as timeout also) | number | 5000                                   |
+| `prefix`  | The prefix for the name of lock / promise pointer living in the caller object (class instance). <br> Set this parameter in case that the default prefix has conflict with your existing object key                                                                                | string | `expirable-synchronized-last-promise-` |
