@@ -1,6 +1,6 @@
 import {
   expirableSynchronized,
-  expirableSynchronizedOnce,
+  expirableSynchronizedExclusive,
   expirableSynchronizedNonFair,
 } from './index';
 
@@ -86,14 +86,14 @@ class Test {
     this.executionArr.push( { call: i, count: this.count } );
   }
 
-  @expirableSynchronizedOnce()
+  @expirableSynchronizedExclusive()
   async increaseCountWithTime3( ts, i ) {
     await delay( ts );
     this.count++;
     this.executionArr.push( { call: i, count: this.count } );
   }
 
-  @expirableSynchronizedOnce( 500 )
+  @expirableSynchronizedExclusive( 500 )
   async increaseCountWithTime4( ts, i ) {
     await delay( ts );
     this.count++;
@@ -237,23 +237,7 @@ describe( 'fair mode', () => {
   } );
 } );
 
-describe( 'non-fair mode', () => {
-  test( 'normal finish', async () => {
-    instance.reset();
-    instance.increaseCountWithTime5( 500, 0 );
-
-    for ( let i = 1; i < 5; i++ ) {
-      await delay( 200 );
-      instance.increaseCountWithTime5( 1, i );
-    }
-
-    await delay( 1500 );
-    const arr = instance.executionArr;
-    console.log( arr );
-  } );
-} );
-
-describe( 'once mode', () => {
+describe( 'exclusive mode', () => {
   test( 'normal finish', async () => {
     instance.reset();
     instance.increaseCountWithTime3( 500, 0 );

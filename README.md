@@ -2,12 +2,19 @@
 
 > A decorator to make Promise function synchronized safely (with expiration time)
 
-Similar to Java's `@synchronized`, this decorator can make a function atomic! All function calls are ordered by FIFO manner (Fair lock).
+Similar to Java's `@synchronized`, this decorator can make a function atomic!
+
+There are two modes:
+
+`Fair` (default): All function calls are ordered by FIFO manner. The function acts like a fair lock added.
+
+`Exclusive`: Drop all other function calls when one hasn't finished.
 
 ***The function to apply this decorator must return a promise***
 
-#### How it works:
+## How it works:
 
+### `Fair`:
 It connects all function calls into a promise chain. 
 It's safe because you can set an expiry time. 
 If one call in the chain takes too long to resolve / reject, the next in the chain will be executed
@@ -15,6 +22,10 @@ If one call in the chain takes too long to resolve / reject, the next in the cha
 It uses a pointer to build promise chain. 
 The promise is saved in the function's `target`(who calls the function). 
 This target is the class instance in most cases.
+
+### `Exclusive`:
+It locks when a function call starts, release it when it's done. No other function call by the same caller can run during the time that this function is locked, and won't run later.
+
 
 ## Installation
 Using npm: 
@@ -37,12 +48,12 @@ You need to turn on `experimentalDecorators`.
 [Official docs](https://www.typescriptlang.org/docs/handbook/decorators.html)
 
 ## How to Use
-Just add `@expirableSynchronized()` above the function that returns a promise. 
+Just add `@expirableSynchronized()` or `@expirableSynchronizedExclusive()` above the function that returns a promise. 
 According to [current stage of decorator proposal](https://github.com/tc39/proposal-decorators), 
 the function has to be a class member.
 
 ```
-class A {
+class Example {
     @expirableSynchronized()
     anyFunctionThatReturnsAPromise() {
         // ...
@@ -55,6 +66,21 @@ class A {
 
     @expirableSynchronized(2000, 'your-custom-prefix-')
     anyFunctionThatReturnsAPromise3() {
+        // ...
+    }
+
+    @expirableSynchronizedExclusive()
+    anyFunctionThatReturnsAPromise4() {
+        // ...
+    }
+
+    @expirableSynchronizedExclusive(2000)
+    anyFunctionThatReturnsAPromise5() {
+        // ...
+    }
+
+    @expirableSynchronizedExclusive(2000, 'your-custom-prefix-')
+    anyFunctionThatReturnsAPromise6() {
         // ...
     }
 }
