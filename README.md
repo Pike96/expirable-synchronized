@@ -1,14 +1,23 @@
-# expirable-synchronized [![Build Status](https://travis-ci.org/Pike96/expirable-synchronized.svg?branch=master)](https://travis-ci.org/Pike96/expirable-synchronized)
+# expirable-synchronized 
 
-> A decorator to make Promise function synchronized safely (with expiration time)
+[![Build Status](https://travis-ci.org/Pike96/expirable-synchronized.svg?branch=master)](https://travis-ci.org/Pike96/expirable-synchronized)
+[![npm](https://img.shields.io/npm/dt/expirable-synchronized.svg)](https://www.npmjs.com/package/expirable-synchronized)
+![npm](https://img.shields.io/npm/v/expirable-synchronized.svg)
+![GitHub](https://img.shields.io/github/license/Pike96/expirable-synchronized.svg)
+
+> A decorator to make any function that returns promise atomic with expiration
 
 Similar to Java's `@synchronized`, this decorator can make a function atomic!
 
 There are two modes:
 
-`Fair` (default): All function calls are ordered by FIFO manner. The function acts like a fair lock added.
+- `Fair`: `@expirableSynchronized` or `@expirableSynchronizedFair`
 
-`Exclusive`: Drop all other function calls when one hasn't finished.
+  Queue up all function calls. The next function call in queue can only start after the previous one finishes. The function acts like a fair lock added.
+
+- `Exclusive`: `@expirableSynchronizedExclusive`
+
+  Drop all other function calls when there is one hasn't finished.
 
 ***The function to apply this decorator must return a promise***
 
@@ -87,7 +96,7 @@ class Example {
 ```
 
 ### Options
-| Parameter | Description                                                                                                                                                                                                                                               | Type   | Default Value                          |
-|-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|----------------------------------------|
-| `life`    | The promise life limit. <br> After this amount of time, the next promise in chain will be executed anyway in Fair mode, lock will be released any way in Exclusive mode <br> Default value is 5 seconds (other packages like jest has 5s as timeout also) | number | 5000                                   |
-| `prefix`  | The prefix for the name of lock / promise pointer living in the caller object (class instance). <br> Set this parameter in case that the default prefix has conflict with your existing object key                                                                                | string | `expirable-synchronized-last-promise-` |
+| Parameter | Description                                                                                                                                                                                                                                               | Type   | Default Value             |
+|-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|---------------------------|
+| `life`    | The promise life limit. <br> After this amount of time, the next promise in chain will be executed anyway in Fair mode, lock will be released any way in Exclusive mode <br> Default value is 5 seconds (other packages like jest has 5s as timeout also) | number | 5000                      |
+| `prefix`  | The prefix for the name of lock / promise pointer living in the caller object (class instance). <br> Set this parameter in case that the default prefix has conflict with your existing object key                                                        | string | `expirable-synchronized-` |
