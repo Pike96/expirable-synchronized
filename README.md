@@ -21,6 +21,13 @@ There are two modes:
 
 ***The function to apply this decorator must return a promise***
 
+## Use Case:
+When you want to use it & Other solutions if you don't really need it:
+- The function has asynchronous jobs and the order matters. (Otherwise, you don't need to do anything.)
+- The function is not called by your program, or it's hard to manage the function caller. A typical example is event listener. (Otherwise, you should improve your code where the function caller is in.)
+- You need the expiration. (Otherwise, consider using RxJS's [asyncScheduler](https://rxjs-dev.firebaseapp.com/api/index/const/asyncScheduler), schedule in a subscription.)
+- If RxJS is too big for your project to include. (Otherwise, RxJS is your answer.)
+
 ## How it works:
 
 ### `Fair`:
