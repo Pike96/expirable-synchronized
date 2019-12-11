@@ -1,7 +1,9 @@
-coverage
 dist/
 .vscode/
 .idea/
 node_modules/
 *.DS_Store
 package-lock.json
+
+coverage/*
+!coverage/badge.svg
