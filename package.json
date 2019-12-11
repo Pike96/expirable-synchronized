@@ -1,6 +1,6 @@
 {
   "name": "expirable-synchronized",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "A decorator to make any function that returns promise atomic with expiration",
   "homepage": "https://github.com/Pike96/expirable-synchronized",
   "repository": {
@@ -15,7 +15,9 @@
     "clean": "rimraf dist/",
     "build": "npm run clean && babel --out-dir=dist/ src/ && jest dist",
     "dev": "npm run clean && babel --source-maps --out-dir=dist/ src/ && npm link",
-    "test": "npm run build"
+    "test": "npm run build",
+    "test:badges": "npm run test:coverage && make-coverage-badge",
+    "test:coverage": "npm run build && jest dist --coverage --config ./jest.config.js"
   },
   "keywords": [
     "annotation",
@@ -79,6 +81,7 @@
     "eslint": "^6.1.0",
     "eslint-plugin-jest": "^22.14.1",
     "jest": "^24.8.0",
+    "make-coverage-badge": "^1.2.0",
     "prettier": "^1.18.2",
     "rimraf": "^2.6.3"
   }

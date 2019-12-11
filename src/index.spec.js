@@ -1,7 +1,6 @@
 import {
   expirableSynchronized,
   expirableSynchronizedExclusive,
-  expirableSynchronizedNonFair,
 } from './index';
 
 /**
