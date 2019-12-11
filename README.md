@@ -1,7 +1,7 @@
 # expirable-synchronized 
 
 [![Build Status](https://travis-ci.org/Pike96/expirable-synchronized.svg?branch=master)](https://travis-ci.org/Pike96/expirable-synchronized)
-![Test Coverage](https://github.com/Pike96/expirable-synchronized/blob/master/coverage/badge.svg)
+![Test Coverage](https://github.com/Pike96/expirable-synchronized/raw/master/coverage/badge.svg?sanitize=true)
 [![npm](https://img.shields.io/npm/dt/expirable-synchronized.svg)](https://www.npmjs.com/package/expirable-synchronized)
 ![npm](https://img.shields.io/npm/v/expirable-synchronized.svg)
 ![GitHub](https://img.shields.io/github/license/Pike96/expirable-synchronized.svg)
