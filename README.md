@@ -54,7 +54,8 @@ Using yarn:
 `yarn add expirable-synchronized`
 
 ## Requirements
-An environment that supports stage-0 of the decorators spec.
+- An environment that supports stage-0 of the decorators spec.
+- Node 8+.
 
 #### If you use transpiler
 - For Babel: You need a decorator plugin
