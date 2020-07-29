@@ -4,5 +4,6 @@
 *.spec.js
 *.js.map
 src
+yarn-error.log
 
 coverage
